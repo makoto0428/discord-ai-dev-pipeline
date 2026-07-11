@@ -8,7 +8,8 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "check-db": "node scripts/checkDb.js",
-    "check-ollama": "node scripts/checkOllama.js"
+    "check-ollama": "node scripts/checkOllama.js",
+    "check-roles": "node scripts/checkRoles.js"
   },
   "dependencies": {
     "better-sqlite3": "^9.6.0",
