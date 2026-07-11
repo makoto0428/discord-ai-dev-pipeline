@@ -99,6 +99,8 @@ cp .env.example .env
 npm start
 ```
 
+M3 時点では、対象チャンネルで管理者が投稿すると新規セッションまたは継続セッションとして判定され、その結果がコンソールログに出力されます。
+
 主な環境変数の一覧は [要件定義書 6章](./docs/phase1/要件定義自動生成Bot_要件定義書.md#6-想定環境変数env例) を参照してください。
 
 ### 使い方
@@ -107,6 +109,16 @@ npm start
 2. Botからの確認（📝 ドラフト確認 / ❓ 質問）にテキストで返信していく
 3. 完成すると ✅ で完了報告があり、`phase1-requirements-bot/output/requirements/` にMarkdownファイルが生成される
 4. 生成されたファイルは手動でGitにcommitする（Botは自動commitしない）
+
+### 現時点で必要なBot権限
+
+- `チャンネルを表示`
+- `メッセージを送る`
+- `メッセージ履歴を読む`
+- `ファイルを添付`
+- Privileged Gateway Intents では `Message Content Intent`
+
+`管理者` 権限は不要です。
 
 ---
 
