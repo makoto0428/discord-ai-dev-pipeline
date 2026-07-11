@@ -1,6 +1,7 @@
 require('dotenv').config();
-const { Client, GatewayIntentBits } = require('discord.js');
 const logger = require('./utils/logger');
+const { initDb, closeDb } = require('./db/db');
+const { createDiscordClient, loginDiscordClient } = require('./discord/client');
 
 // .env 必須項目の確認
 const requiredEnvVars = [
@@ -16,27 +17,26 @@ for (const key of requiredEnvVars) {
   }
 }
 
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-  ],
-});
+initDb();
 
-client.once('ready', () => {
-  logger.info(`Bot が起動しました: ${client.user.tag}`);
-});
-
-client.on('error', (err) => {
-  logger.error('Discord クライアントエラー', err);
-});
+const client = createDiscordClient();
 
 process.on('unhandledRejection', (err) => {
   logger.error('未処理の Promise 拒否', err);
 });
 
-client.login(process.env.DISCORD_TOKEN).catch((err) => {
+process.on('SIGINT', () => {
+  closeDb();
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  closeDb();
+  process.exit(0);
+});
+
+loginDiscordClient(client, process.env.DISCORD_TOKEN).catch((err) => {
   logger.error('Discord へのログインに失敗しました', err);
+  closeDb();
   process.exit(1);
 });

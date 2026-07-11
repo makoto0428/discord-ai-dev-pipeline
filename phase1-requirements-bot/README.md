@@ -67,6 +67,11 @@ npm start
 [2026-07-11T00:00:00.000Z] [INFO] Bot が起動しました: YourBot#1234
 ```
 
+対象チャンネルで管理者が投稿すると、M3 時点では以下のいずれかのログが出ます。
+
+- 進行中セッションがない場合: `新規セッションを開始しました`
+- 進行中セッションがある場合: `継続セッションへの返信を受信しました`
+
 ### 5. 開発時（ファイル変更を自動検知して再起動）
 
 ```bash
@@ -127,5 +132,11 @@ phase1-requirements-bot/
 
 Discord Developer Portal で以下を有効化してください。
 
-- **Bot Permissions**: `Send Messages`, `Read Message History`, `Attach Files`
+- **Bot Permissions**: `View Channels`, `Send Messages`, `Read Message History`, `Attach Files`
 - **Privileged Gateway Intents**: `Message Content Intent`
+
+補足:
+
+- `Administrator` 権限は不要です
+- 現時点の M3 実装では `Attach Files` は未使用ですが、M7 以降でドラフト添付に使うため先に付与して問題ありません
+- Bot を特定チャンネルだけで使うなら、サーバー全体ではなく対象チャンネルにだけ上記権限を与える運用で十分です
