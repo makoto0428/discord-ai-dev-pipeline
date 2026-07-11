@@ -3,9 +3,23 @@ const {
   createMessage,
   createSession,
   getActiveSession,
+  getLatestDraft,
+  getLastMessage,
   getLastMessageType,
+  getDraftById,
+  getMessagesBySessionAndRound,
+  updateSessionStatus,
 } = require('../db/db');
 const { runRound } = require('../orchestrator/roundRunner');
+const { runDirectorQuestionFormatter } = require('../orchestrator/roles/director');
+const {
+  postDraftReviewConfirmation,
+  postQuestionForHuman,
+  postAiDiscussion,
+  postAmbiguousDraftReplyNotice,
+  postAmbiguousQuestionAnswerNotice,
+  postAcknowledgedOk,
+} = require('./messageBuilder');
 
 function getRequiredEnv(name) {
   const value = process.env[name];
@@ -28,7 +42,105 @@ function getMaxRounds() {
   return maxRounds;
 }
 
-async function handleMessageCreate(message) {
+function shouldShowAiDiscussion() {
+  return (process.env.SHOW_AI_DISCUSSION || 'false').toLowerCase() === 'true';
+}
+
+function detectHumanContext(sessionId) {
+  const lastMessageType = getLastMessageType(sessionId);
+  if (lastMessageType === 'question') {
+    return 'question_answer';
+  }
+
+  const lastMessage = getLastMessage(sessionId);
+  const latestDraft = getLatestDraft(sessionId);
+
+  if (
+    lastMessage?.role === 'reviewer'
+    && lastMessage?.message_type === 'normal'
+    && (latestDraft?.reviewer_verdict === 'ok' || latestDraft?.reviewer_verdict === 'needs_revision')
+  ) {
+    return 'draft_confirmation';
+  }
+
+  return 'normal';
+}
+
+function classifyDraftConfirmationReply(content) {
+  const normalized = content.trim().toLowerCase();
+
+  if (/^(ok|okay|承認|問題ありません|この内容でok|確定)$/.test(normalized)) {
+    return 'ok';
+  }
+
+  if (normalized.includes('修正') || normalized.includes('変更') || normalized.includes('追記')) {
+    return 'revision';
+  }
+
+  return 'ambiguous';
+}
+
+function isAmbiguousQuestionAnswer(content) {
+  const normalized = content.trim();
+  if (normalized.length < 2) {
+    return true;
+  }
+  return /^(わからない|不明|どっちでも|任せる)$/.test(normalized);
+}
+
+async function postRoundResultToDiscord({ channel, result, runDirectorQuestionFormatterFn }) {
+  if (result.nextAction === 'ask_human') {
+    const formatted = await runDirectorQuestionFormatterFn({
+      rawQuestion: result.questionText,
+    });
+
+    await postQuestionForHuman({
+      channel,
+      questionText: formatted.content,
+      sourceRole: result.questionSource,
+      isFollowUp: Boolean(result.isFollowUpQuestion),
+    });
+    return;
+  }
+
+  if (result.nextAction === 'review_result') {
+    const draft = getDraftById(result.draftId);
+    if (!draft) {
+      throw new Error(`ドラフトが見つかりません: ${result.draftId}`);
+    }
+
+    await postDraftReviewConfirmation({
+      channel,
+      roundNumber: result.roundNumber,
+      draftMarkdown: draft.content_markdown,
+      reviewerVerdict: result.reviewerVerdict,
+      reviewerComment: result.reviewerComment,
+    });
+  }
+}
+
+async function postAiDiscussionIfEnabled({ channel, sessionId, roundNumber }) {
+  if (!shouldShowAiDiscussion()) {
+    return;
+  }
+
+  const roundMessages = getMessagesBySessionAndRound(sessionId, roundNumber)
+    .filter((m) => m.role === 'director' || m.role === 'requirements_writer' || m.role === 'reviewer');
+
+  for (const m of roundMessages) {
+    await postAiDiscussion({
+      channel,
+      role: m.role,
+      messageType: m.message_type,
+      content: m.content,
+    });
+  }
+}
+
+async function handleMessageCreate(message, deps = {}) {
+  const runRoundFn = deps.runRound || runRound;
+  const runDirectorQuestionFormatterFn = deps.runDirectorQuestionFormatter || runDirectorQuestionFormatter;
+
   if (message.author?.bot) {
     return;
   }
@@ -77,10 +189,22 @@ async function handleMessageCreate(message) {
       userId: message.author.id,
     });
 
-    const result = await runRound({
+    const result = await runRoundFn({
       sessionId,
       humanInput: message.content,
       logger,
+    });
+
+    await postAiDiscussionIfEnabled({
+      channel: message.channel,
+      sessionId,
+      roundNumber: result.roundNumber,
+    });
+
+    await postRoundResultToDiscord({
+      channel: message.channel,
+      result,
+      runDirectorQuestionFormatterFn,
     });
 
     logger.info('M6ラウンド実行結果', {
@@ -93,8 +217,37 @@ async function handleMessageCreate(message) {
     return;
   }
 
-  const lastMessageType = getLastMessageType(activeSession.id);
-  const humanMessageType = lastMessageType === 'question' ? 'question_answer' : 'normal';
+  const humanContext = detectHumanContext(activeSession.id);
+
+  if (humanContext === 'draft_confirmation') {
+    const replyType = classifyDraftConfirmationReply(message.content);
+
+    if (replyType === 'ambiguous') {
+      await postAmbiguousDraftReplyNotice(message.channel);
+      return;
+    }
+
+    createMessage({
+      sessionId: activeSession.id,
+      role: 'human',
+      messageType: 'normal',
+      content: message.content,
+      roundNumber: activeSession.round_count,
+    });
+
+    if (replyType === 'ok') {
+      updateSessionStatus(activeSession.id, 'confirmed');
+      await postAcknowledgedOk(message.channel);
+      return;
+    }
+  }
+
+  if (humanContext === 'question_answer' && isAmbiguousQuestionAnswer(message.content)) {
+    await postAmbiguousQuestionAnswerNotice(message.channel);
+    return;
+  }
+
+  const humanMessageType = humanContext === 'question_answer' ? 'question_answer' : 'normal';
 
   createMessage({
     sessionId: activeSession.id,
@@ -112,10 +265,22 @@ async function handleMessageCreate(message) {
     humanMessageType,
   });
 
-  const result = await runRound({
+  const result = await runRoundFn({
     sessionId: activeSession.id,
     humanInput: message.content,
     logger,
+  });
+
+  await postAiDiscussionIfEnabled({
+    channel: message.channel,
+    sessionId: activeSession.id,
+    roundNumber: result.roundNumber,
+  });
+
+  await postRoundResultToDiscord({
+    channel: message.channel,
+    result,
+    runDirectorQuestionFormatterFn,
   });
 
   logger.info('M6ラウンド実行結果', {

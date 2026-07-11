@@ -285,6 +285,7 @@ async function runRound({ sessionId, humanInput, logger = console, deps = {} }) 
           nextAction: 'ask_human',
           questionSource: 'requirements_writer',
           questionText: writerQuestion,
+          isFollowUpQuestion: true,
           draftId,
         };
       }
@@ -312,6 +313,7 @@ async function runRound({ sessionId, humanInput, logger = console, deps = {} }) 
         nextAction: 'ask_human',
         questionSource: 'requirements_writer',
         questionText: writerQuestion,
+        isFollowUpQuestion: false,
         draftId,
       };
     }
@@ -376,6 +378,7 @@ async function runRound({ sessionId, humanInput, logger = console, deps = {} }) 
           nextAction: 'ask_human',
           questionSource: 'reviewer',
           questionText: reviewerQuestion,
+          isFollowUpQuestion: true,
           draftId,
         };
       }
@@ -401,6 +404,7 @@ async function runRound({ sessionId, humanInput, logger = console, deps = {} }) 
         nextAction: 'ask_human',
         questionSource: 'reviewer',
         questionText: reviewerQuestion,
+        isFollowUpQuestion: false,
         draftId,
       };
     }

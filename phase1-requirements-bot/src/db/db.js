@@ -169,6 +169,18 @@ function getMessagesBySession(sessionId) {
 }
 
 /**
+ * セッションIDとラウンド番号に紐づくメッセージ一覧を返す。
+ * @param {number} sessionId
+ * @param {number} roundNumber
+ * @returns {object[]}
+ */
+function getMessagesBySessionAndRound(sessionId, roundNumber) {
+  return getDb().prepare(`
+    SELECT * FROM messages WHERE session_id = ? AND round_number = ? ORDER BY id ASC
+  `).all(sessionId, roundNumber);
+}
+
+/**
  * セッションの直近N件のメッセージを返す。
  * @param {number} sessionId
  * @param {number} limit
@@ -190,6 +202,17 @@ function getLastMessageType(sessionId) {
     SELECT message_type FROM messages WHERE session_id = ? ORDER BY id DESC LIMIT 1
   `).get(sessionId);
   return row?.message_type;
+}
+
+/**
+ * セッションの最後のメッセージを返す。
+ * @param {number} sessionId
+ * @returns {object|undefined}
+ */
+function getLastMessage(sessionId) {
+  return getDb().prepare(`
+    SELECT * FROM messages WHERE session_id = ? ORDER BY id DESC LIMIT 1
+  `).get(sessionId);
 }
 
 // ─────────────────────────────────────────────
@@ -233,6 +256,15 @@ function getLatestDraft(sessionId) {
 }
 
 /**
+ * ドラフトIDで取得する。
+ * @param {number} id
+ * @returns {object|undefined}
+ */
+function getDraftById(id) {
+  return getDb().prepare('SELECT * FROM drafts WHERE id = ?').get(id);
+}
+
+/**
  * セッションIDに紐づくドラフト一覧を返す。
  * @param {number} sessionId
  * @returns {object[]}
@@ -257,11 +289,14 @@ module.exports = {
   // messages
   createMessage,
   getMessagesBySession,
+  getMessagesBySessionAndRound,
   getRecentMessages,
   getLastMessageType,
+  getLastMessage,
   // drafts
   createDraft,
   updateDraftReview,
   getLatestDraft,
+  getDraftById,
   getDraftsBySession,
 };
