@@ -3,7 +3,9 @@ const {
   createMessage,
   createSession,
   getActiveSession,
+  getLastMessageType,
 } = require('../db/db');
+const { runRound } = require('../orchestrator/roundRunner');
 
 function getRequiredEnv(name) {
   const value = process.env[name];
@@ -74,13 +76,30 @@ async function handleMessageCreate(message) {
       channelId: message.channelId,
       userId: message.author.id,
     });
+
+    const result = await runRound({
+      sessionId,
+      humanInput: message.content,
+      logger,
+    });
+
+    logger.info('M6ラウンド実行結果', {
+      sessionId,
+      roundNumber: result.roundNumber,
+      nextAction: result.nextAction,
+      reviewerVerdict: result.reviewerVerdict,
+      questionSource: result.questionSource,
+    });
     return;
   }
+
+  const lastMessageType = getLastMessageType(activeSession.id);
+  const humanMessageType = lastMessageType === 'question' ? 'question_answer' : 'normal';
 
   createMessage({
     sessionId: activeSession.id,
     role: 'human',
-    messageType: 'normal',
+    messageType: humanMessageType,
     content: message.content,
     roundNumber: activeSession.round_count,
   });
@@ -90,6 +109,21 @@ async function handleMessageCreate(message) {
     roundCount: activeSession.round_count,
     channelId: message.channelId,
     userId: message.author.id,
+    humanMessageType,
+  });
+
+  const result = await runRound({
+    sessionId: activeSession.id,
+    humanInput: message.content,
+    logger,
+  });
+
+  logger.info('M6ラウンド実行結果', {
+    sessionId: activeSession.id,
+    roundNumber: result.roundNumber,
+    nextAction: result.nextAction,
+    reviewerVerdict: result.reviewerVerdict,
+    questionSource: result.questionSource,
   });
 }
 
