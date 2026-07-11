@@ -45,6 +45,7 @@ cp .env.example .env
 | `MAX_ROUNDS` | 1 セッションの最大ラウンド数（デフォルト: `10`） |
 | `MAX_INTERNAL_DELIBERATION` | 内部協議の最大試行回数（デフォルト: `2`） |
 | `SHOW_AI_DISCUSSION` | AI 発言を Discord にリアルタイム投稿するか（`true`/`false`、デフォルト: `false`） |
+| `LOG_LEVEL` | ログ出力レベル（`DEBUG` / `INFO` / `WARN` / `ERROR`、デフォルト: `INFO`） |
 | `DB_PATH` | SQLite DB ファイルのパス（デフォルト: `./data/bot.db`） |
 
 ### 3. Ollama のモデル準備
@@ -121,6 +122,80 @@ npm run check-e2e
 - 正常系: セッション開始から確定まで
 - エラー系: Ollama接続エラー時の挙動
 - 再起動系: DB永続化によるセッション継続
+
+### 11. 一括チェック（M1〜M9）
+
+```bash
+npm run check-db && \
+npm run check-ollama && \
+npm run check-roles && \
+npm run check-round-runner-branches && \
+npm run check-round-runner && \
+npm run check-human-flow && \
+npm run check-finalization && \
+npm run check-e2e
+```
+
+開発中の回帰確認として、主要チェックを順に実行できます。
+
+---
+
+## 運用手順
+
+### 通常起動
+
+```bash
+npm start
+```
+
+### 常時運用（例: systemd / pm2 など）
+
+- プロセス管理ツールで `npm start` を常駐化してください。
+- 再起動時も `DB_PATH` のファイルは保持し、セッション継続性を確保してください。
+- 監視では以下を最低限確認する運用を推奨します。
+	- プロセス稼働
+	- Discordログイン成功ログ
+	- Ollama疎通
+
+### ログ運用
+
+- `LOG_LEVEL=INFO` を基本設定とし、調査時のみ `DEBUG` に上げる運用を推奨します。
+- エラー発生時は `ERROR` ログの直前直後を確認し、入力メッセージIDとセッションIDを追跡してください。
+
+---
+
+## トラブルシューティング
+
+### 1) `.env` 未設定エラーで起動できない
+
+- 症状: `必須の環境変数が不足しているため起動できません。`
+- 対応:
+	1. `cp .env.example .env`
+	2. `DISCORD_TOKEN`, `DISCORD_CHANNEL_ID`, `DISCORD_ADMIN_USER_ID` を設定
+
+### 2) Discordへログインできない
+
+- 症状: `Discord へのログインに失敗しました`
+- 確認ポイント:
+	- トークンの有効性
+	- Botがサーバーに招待済みか
+	- Message Content Intent が有効か
+
+### 3) Ollama接続エラー
+
+- 症状: `Ollamaサーバーに接続できません`
+- 確認ポイント:
+	- `OLLAMA_HOST` が正しいか
+	- `ollama serve` が稼働しているか
+	- 設定したモデルが pull 済みか
+
+### 4) 進行中セッションが見つからない/継続できない
+
+- 症状: 再起動後に新規セッション扱いになる
+- 確認ポイント:
+	- `DB_PATH` が毎回同じか
+	- DBファイルが永続ディスク上にあるか
+	- `sessions.status` が `in_progress` か
 
 ---
 
