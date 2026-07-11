@@ -1,0 +1,4 @@
+data/
+output/requirements/
+node_modules/
+.env
