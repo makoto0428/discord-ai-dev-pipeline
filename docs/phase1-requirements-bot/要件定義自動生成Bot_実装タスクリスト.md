@@ -49,10 +49,10 @@ GitHub Copilot等に1タスクずつ渡していくことを想定したマイ�
 ---
 
 ## M5. AIロールの実装
-- [ ] `phase1-requirements-bot/prompts/director.md`, `phase1-requirements-bot/prompts/requirementsWriter.md`, `phase1-requirements-bot/prompts/reviewer.md` を配置（プロンプト設計書の内容）
-- [ ] `phase1-requirements-bot/src/orchestrator/roles/director.js` 実装（プロンプト読み込み＋Ollama呼び出し＋出力整形）
-- [ ] `phase1-requirements-bot/src/orchestrator/roles/requirementsWriter.js` 実装
-- [ ] `phase1-requirements-bot/src/orchestrator/roles/reviewer.js` 実装（VERDICTのパース処理を含む）
+- [x] `phase1-requirements-bot/prompts/director.md`, `phase1-requirements-bot/prompts/requirementsWriter.md`, `phase1-requirements-bot/prompts/reviewer.md` を配置（プロンプト設計書の内容）
+- [x] `phase1-requirements-bot/src/orchestrator/roles/director.js` 実装（プロンプト読み込み＋Ollama呼び出し＋出力整形）
+- [x] `phase1-requirements-bot/src/orchestrator/roles/requirementsWriter.js` 実装
+- [x] `phase1-requirements-bot/src/orchestrator/roles/reviewer.js` 実装（VERDICTのパース処理を含む）
 
 **完了条件**: 3つのロールそれぞれを個別に呼び出し、想定通りのフォーマットで応答が返ることを確認できる
 
