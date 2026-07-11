@@ -176,8 +176,29 @@ async function postAmbiguousQuestionAnswerNotice(channel) {
 async function postAcknowledgedOk(channel) {
   await postLongText(
     channel,
-    'OKを受け付けました。確定処理はM8で実装予定のため、現時点ではセッションをconfirmedとして終了します。',
+    'OKを受け付けました。最終ドラフトを保存してセッションを確定します。',
     { prefix: '✅ 受付完了' },
+  );
+}
+
+async function postFinalizationNotice({ channel, outputPath, reason }) {
+  const reasonLabel =
+    reason === 'review_ok'
+      ? 'レビューOK'
+      : reason === 'max_rounds'
+        ? '最大ラウンド到達'
+        : reason === 'human_ok'
+          ? '人間OK'
+          : '不明';
+
+  await postLongText(
+    channel,
+    [
+      '要件定義セッションを確定しました。',
+      `確定理由: ${reasonLabel}`,
+      `保存先: ${outputPath}`,
+    ].join('\n'),
+    { prefix: '✅ 完了報告' },
   );
 }
 
@@ -192,4 +213,5 @@ module.exports = {
   postAmbiguousDraftReplyNotice,
   postAmbiguousQuestionAnswerNotice,
   postAcknowledgedOk,
+  postFinalizationNotice,
 };

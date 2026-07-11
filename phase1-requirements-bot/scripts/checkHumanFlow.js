@@ -165,8 +165,8 @@ async function scenarioReviewResultPostAndOkReply() {
     writerQuestion: null,
   });
   updateDraftReview(draftId, {
-    reviewerVerdict: 'ok',
-    reviewerComment: '不足なし',
+    reviewerVerdict: 'needs_revision',
+    reviewerComment: '不足あり',
   });
 
   const channel1 = createMockChannel();
@@ -176,8 +176,8 @@ async function scenarioReviewResultPostAndOkReply() {
       sessionId,
       roundNumber: 1,
       nextAction: 'review_result',
-      reviewerVerdict: 'ok',
-      reviewerComment: '不足なし',
+      reviewerVerdict: 'needs_revision',
+      reviewerComment: '不足あり',
       draftId,
     }),
   });
@@ -190,7 +190,7 @@ async function scenarioReviewResultPostAndOkReply() {
     sessionId,
     role: 'reviewer',
     messageType: 'normal',
-    content: 'VERDICT: OK',
+    content: 'VERDICT: NEEDS_REVISION',
     roundNumber: 1,
   });
 

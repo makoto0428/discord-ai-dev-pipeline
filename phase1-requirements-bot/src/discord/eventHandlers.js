@@ -8,10 +8,10 @@ const {
   getLastMessageType,
   getDraftById,
   getMessagesBySessionAndRound,
-  updateSessionStatus,
 } = require('../db/db');
 const { runRound } = require('../orchestrator/roundRunner');
 const { runDirectorQuestionFormatter } = require('../orchestrator/roles/director');
+const { checkCompletion, finalizeSession } = require('../orchestrator/sessionManager');
 const {
   postDraftReviewConfirmation,
   postQuestionForHuman,
@@ -19,6 +19,7 @@ const {
   postAmbiguousDraftReplyNotice,
   postAmbiguousQuestionAnswerNotice,
   postAcknowledgedOk,
+  postFinalizationNotice,
 } = require('./messageBuilder');
 
 function getRequiredEnv(name) {
@@ -88,7 +89,14 @@ function isAmbiguousQuestionAnswer(content) {
   return /^(わからない|不明|どっちでも|任せる)$/.test(normalized);
 }
 
-async function postRoundResultToDiscord({ channel, result, runDirectorQuestionFormatterFn }) {
+async function postRoundResultToDiscord({
+  channel,
+  sessionId,
+  result,
+  runDirectorQuestionFormatterFn,
+  checkCompletionFn,
+  finalizeSessionFn,
+}) {
   if (result.nextAction === 'ask_human') {
     const formatted = await runDirectorQuestionFormatterFn({
       rawQuestion: result.questionText,
@@ -104,6 +112,26 @@ async function postRoundResultToDiscord({ channel, result, runDirectorQuestionFo
   }
 
   if (result.nextAction === 'review_result') {
+    const completion = checkCompletionFn({
+      sessionId,
+      roundResult: result,
+    });
+
+    if (completion.isComplete) {
+      const finalized = finalizeSessionFn({
+        sessionId,
+        reason: completion.reason,
+        logger,
+      });
+
+      await postFinalizationNotice({
+        channel,
+        outputPath: finalized.outputPath,
+        reason: completion.reason,
+      });
+      return;
+    }
+
     const draft = getDraftById(result.draftId);
     if (!draft) {
       throw new Error(`ドラフトが見つかりません: ${result.draftId}`);
@@ -140,6 +168,8 @@ async function postAiDiscussionIfEnabled({ channel, sessionId, roundNumber }) {
 async function handleMessageCreate(message, deps = {}) {
   const runRoundFn = deps.runRound || runRound;
   const runDirectorQuestionFormatterFn = deps.runDirectorQuestionFormatter || runDirectorQuestionFormatter;
+  const checkCompletionFn = deps.checkCompletion || checkCompletion;
+  const finalizeSessionFn = deps.finalizeSession || finalizeSession;
 
   if (message.author?.bot) {
     return;
@@ -203,8 +233,11 @@ async function handleMessageCreate(message, deps = {}) {
 
     await postRoundResultToDiscord({
       channel: message.channel,
+      sessionId,
       result,
       runDirectorQuestionFormatterFn,
+      checkCompletionFn,
+      finalizeSessionFn,
     });
 
     logger.info('M6ラウンド実行結果', {
@@ -236,8 +269,18 @@ async function handleMessageCreate(message, deps = {}) {
     });
 
     if (replyType === 'ok') {
-      updateSessionStatus(activeSession.id, 'confirmed');
+      const finalized = finalizeSessionFn({
+        sessionId: activeSession.id,
+        reason: 'human_ok',
+        logger,
+      });
+
       await postAcknowledgedOk(message.channel);
+      await postFinalizationNotice({
+        channel: message.channel,
+        outputPath: finalized.outputPath,
+        reason: 'human_ok',
+      });
       return;
     }
   }
@@ -279,8 +322,11 @@ async function handleMessageCreate(message, deps = {}) {
 
   await postRoundResultToDiscord({
     channel: message.channel,
+    sessionId: activeSession.id,
     result,
     runDirectorQuestionFormatterFn,
+    checkCompletionFn,
+    finalizeSessionFn,
   });
 
   logger.info('M6ラウンド実行結果', {
