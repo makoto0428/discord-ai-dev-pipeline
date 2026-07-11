@@ -89,10 +89,10 @@ GitHub Copilot等に1タスクずつ渡していくことを想定したマイ�
 ---
 
 ## M8. 終了条件・確定処理
-- [ ] `sessionManager.checkCompletion()` 実装（レビューOK判定／最大ラウンド到達の判定）
-- [ ] `sessionManager.finalizeSession()` 実装（`sessions.status`更新）
-- [ ] `phase1-requirements-bot/src/output/markdownExporter.js` 実装（最終ドラフトをテンプレート形式で整形し保存）
-- [ ] 確定時にDiscordへ完了報告＋保存パスを投稿する処理を実装
+- [x] `sessionManager.checkCompletion()` 実装（レビューOK判定／最大ラウンド到達の判定）
+- [x] `sessionManager.finalizeSession()` 実装（`sessions.status`更新）
+- [x] `phase1-requirements-bot/src/output/markdownExporter.js` 実装（最終ドラフトをテンプレート形式で整形し保存）
+- [x] 確定時にDiscordへ完了報告＋保存パスを投稿する処理を実装
 
 **完了条件**: レビューOK、または最大ラウンド到達のいずれかで、`output/requirements/`配下にMarkdownファイルが生成される
 
