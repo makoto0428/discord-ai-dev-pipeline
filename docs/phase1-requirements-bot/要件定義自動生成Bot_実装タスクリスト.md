@@ -19,10 +19,10 @@ GitHub Copilot等に1タスクずつ渡していくことを想定したマイ�
 ---
 
 ## M2. DB層実装
-- [ ] `phase1-requirements-bot/src/db/schema.sql` を詳細設計書のスキーマ通りに作成
-- [ ] `phase1-requirements-bot/src/db/db.js` でSQLite接続・マイグレーション実行処理を実装
-- [ ] `sessions` / `messages` / `drafts` それぞれのCRUD関数を実装
-- [ ] 簡易な動作確認スクリプト（セッション作成→メッセージ追加→取得、が一通り動くこと）
+- [x] `phase1-requirements-bot/src/db/schema.sql` を詳細設計書のスキーマ通りに作成
+- [x] `phase1-requirements-bot/src/db/db.js` でSQLite接続・マイグレーション実行処理を実装
+- [x] `sessions` / `messages` / `drafts` それぞれのCRUD関数を実装
+- [x] 簡易な動作確認スクリプト（セッション作成→メッセージ追加→取得、が一通り動くこと）
 
 **完了条件**: DBファイルが生成され、CRUD操作がテストコードまたは簡易スクリプトで確認できる
 

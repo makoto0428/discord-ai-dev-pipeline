@@ -51,12 +51,12 @@ AIチーム内で解決できない疑問点があれば、その都度質問（
 本格的なテンプレート形式のMarkdownファイルとしてローカル保存（✅完了報告）
 ```
 
-詳細な仕様は [`docs/phase1/`](./docs/phase1/) 配下のドキュメントを参照してください。
+詳細な仕様は [`docs/phase1-requirements-bot/`](./docs/phase1-requirements-bot/) 配下のドキュメントを参照してください。
 
-- [要件定義書](./docs/phase1/要件定義自動生成Bot_要件定義書.md)
-- [詳細設計書](./docs/phase1/要件定義自動生成Bot_詳細設計書.md)
-- [AIロール プロンプト設計書](./docs/phase1/要件定義自動生成Bot_プロンプト設計書.md)
-- [実装タスクリスト](./docs/phase1/要件定義自動生成Bot_実装タスクリスト.md)
+- [要件定義書](./docs/phase1-requirements-bot/要件定義自動生成Bot_要件定義書.md)
+- [詳細設計書](./docs/phase1-requirements-bot/要件定義自動生成Bot_詳細設計書.md)
+- [AIロール プロンプト設計書](./docs/phase1-requirements-bot/要件定義自動生成Bot_プロンプト設計書.md)
+- [実装タスクリスト](./docs/phase1-requirements-bot/要件定義自動生成Bot_実装タスクリスト.md)
 
 ---
 
