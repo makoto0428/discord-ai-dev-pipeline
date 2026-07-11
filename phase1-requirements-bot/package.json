@@ -13,7 +13,8 @@
     "check-round-runner": "node scripts/checkRoundRunner.js",
     "check-round-runner-branches": "node scripts/checkRoundRunnerBranches.js",
     "check-human-flow": "node scripts/checkHumanFlow.js",
-    "check-finalization": "node scripts/checkFinalization.js"
+    "check-finalization": "node scripts/checkFinalization.js",
+    "check-e2e": "node scripts/checkE2E.js"
   },
   "dependencies": {
     "better-sqlite3": "^9.6.0",
