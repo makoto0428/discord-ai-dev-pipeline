@@ -86,6 +86,14 @@ npm run check-db
 
 SQLite の `sessions` / `messages` / `drafts` に対して、作成・更新・取得が一通り動くことを確認します。
 
+### 7. Ollama 連携の動作確認
+
+```bash
+npm run check-ollama
+```
+
+`MODEL_DIRECTOR` / `MODEL_REQUIREMENTS_WRITER` / `MODEL_REVIEWER` に設定した3モデルへ短いプロンプトを投げ、応答取得を確認します。
+
 ---
 
 ## ディレクトリ構成
@@ -119,7 +127,8 @@ phase1-requirements-bot/
 ├── output/
 │   └── requirements/             # 生成された要件定義書の保存先
 ├── scripts/
-│   └── checkDb.js                # DB層の簡易動作確認スクリプト
+│   ├── checkDb.js                # DB層の簡易動作確認スクリプト
+│   └── checkOllama.js            # Ollama連携の簡易動作確認スクリプト
 ├── data/                         # SQLite DB ファイルの保存先（.gitignore 対象）
 ├── .env.example
 ├── package.json
