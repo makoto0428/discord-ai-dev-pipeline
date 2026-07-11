@@ -94,6 +94,14 @@ npm run check-ollama
 
 `MODEL_DIRECTOR` / `MODEL_REQUIREMENTS_WRITER` / `MODEL_REVIEWER` に設定した3モデルへ短いプロンプトを投げ、応答取得を確認します。
 
+### 8. 人間確認フロー（M7）の動作確認
+
+```bash
+npm run check-human-flow
+```
+
+ドラフト確認・質問対応・曖昧返信の再確認・Discord投稿フォーマットが想定どおりに動作することを確認します。
+
 ---
 
 ## ディレクトリ構成
