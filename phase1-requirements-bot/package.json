@@ -6,7 +6,8 @@
   "type": "commonjs",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "node --watch src/index.js"
+    "dev": "node --watch src/index.js",
+    "check-db": "node scripts/checkDb.js"
   },
   "dependencies": {
     "better-sqlite3": "^9.6.0",

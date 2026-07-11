@@ -73,6 +73,14 @@ npm start
 npm run dev
 ```
 
+### 6. DB 層の動作確認
+
+```bash
+npm run check-db
+```
+
+SQLite の `sessions` / `messages` / `drafts` に対して、作成・更新・取得が一通り動くことを確認します。
+
 ---
 
 ## ディレクトリ構成
@@ -105,6 +113,8 @@ phase1-requirements-bot/
 │   └── reviewer.md               # レビュー役プロンプト（M5 で配置）
 ├── output/
 │   └── requirements/             # 生成された要件定義書の保存先
+├── scripts/
+│   └── checkDb.js                # DB層の簡易動作確認スクリプト
 ├── data/                         # SQLite DB ファイルの保存先（.gitignore 対象）
 ├── .env.example
 ├── package.json
