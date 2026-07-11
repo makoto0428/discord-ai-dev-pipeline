@@ -9,7 +9,9 @@
     "dev": "node --watch src/index.js",
     "check-db": "node scripts/checkDb.js",
     "check-ollama": "node scripts/checkOllama.js",
-    "check-roles": "node scripts/checkRoles.js"
+    "check-roles": "node scripts/checkRoles.js",
+    "check-round-runner": "node scripts/checkRoundRunner.js",
+    "check-round-runner-branches": "node scripts/checkRoundRunnerBranches.js"
   },
   "dependencies": {
     "better-sqlite3": "^9.6.0",

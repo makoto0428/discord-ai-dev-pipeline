@@ -59,15 +59,15 @@ GitHub Copilot等に1タスクずつ渡していくことを想定したマイ�
 ---
 
 ## M6. 3AIオーケストレーションロジック
-- [ ] `phase1-requirements-bot/src/orchestrator/roundRunner.js` 実装（指示役→要件定義役→レビュー役を1ラウンドとして実行）
-- [ ] 要件定義役の出力から「## 要確認事項」を検出し、内容があればレビュー役呼び出しをスキップする分岐を実装
-- [ ] レビュー役の`VERDICT: QUESTION`を検出する分岐を実装
-- [ ] 「直前が`question_answer`かどうか」を判定し、新規質問／同一論点の再質問を区別するロジックを実装
-- [ ] 同一論点の再質問時に内部協議モード（`prompts`の追加指示付き）で発端ロールを再実行する処理を実装
-- [ ] `sessions.deliberation_count`のインクリメント・リセット処理を実装（`MAX_INTERNAL_DELIBERATION`超過で人間へエスカレーション）
-- [ ] 各ラウンドの発言・ドラフトをDBに保存する処理を実装（M2連携、`message_type`の出し分けを含む）
-- [ ] `sessions.round_count` のインクリメント処理を実装（質問分岐時はインクリメントしない）
-- [ ] `sessions.question_count` のインクリメント処理を実装（質問分岐時のみ）
+- [x] `phase1-requirements-bot/src/orchestrator/roundRunner.js` 実装（指示役→要件定義役→レビュー役を1ラウンドとして実行）
+- [x] 要件定義役の出力から「## 要確認事項」を検出し、内容があればレビュー役呼び出しをスキップする分岐を実装
+- [x] レビュー役の`VERDICT: QUESTION`を検出する分岐を実装
+- [x] 「直前が`question_answer`かどうか」を判定し、新規質問／同一論点の再質問を区別するロジックを実装
+- [x] 同一論点の再質問時に内部協議モード（`prompts`の追加指示付き）で発端ロールを再実行する処理を実装
+- [x] `sessions.deliberation_count`のインクリメント・リセット処理を実装（`MAX_INTERNAL_DELIBERATION`超過で人間へエスカレーション）
+- [x] 各ラウンドの発言・ドラフトをDBに保存する処理を実装（M2連携、`message_type`の出し分けを含む）
+- [x] `sessions.round_count` のインクリメント処理を実装（質問分岐時はインクリメントしない）
+- [x] `sessions.question_count` のインクリメント処理を実装（質問分岐時のみ）
 
 **完了条件**: 人間の初回入力から1ラウンド分の3AI応答が生成され、DBに記録される。要件定義役・レビュー役どちらから質問が出ても正しく質問分岐に入ることを確認できる
 
